@@ -12,7 +12,7 @@
     <string name="period_weekly">Heti</string>
     <string name="period_monthly">Havi</string>
     <string name="income">Bevétel</string>
-    <string name="net">Nettó</string>
+    <string name="net">Egyenleg</string>
     <string name="export_action">Export</string>
     <string name="import_action">Import</string>
     <string name="export_success">Export sikeres</string>

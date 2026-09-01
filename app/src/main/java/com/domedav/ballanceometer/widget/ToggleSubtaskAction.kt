@@ -7,6 +7,7 @@ import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.updateAll
 import com.domedav.ballanceometer.BallanceometerApp
 import java.time.LocalDate
+import kotlinx.coroutines.flow.first
 
 class ToggleSubtaskAction : ActionCallback {
     override suspend fun onAction(
@@ -17,7 +18,13 @@ class ToggleSubtaskAction : ActionCallback {
         val subtaskId = parameters[SUBTASK_ID_KEY] ?: return
         val app = context.applicationContext as? BallanceometerApp ?: return
         val today = LocalDate.now().toString()
-        app.repository.completeSubtask(subtaskId, today)
+        // toggle: if already completed today delete, else complete — mirrors ShowViewModel
+        val existing = app.repository.completions.first().firstOrNull { it.subtaskId == subtaskId && it.date == today }
+        if (existing != null) {
+            app.repository.deleteCompletion(existing)
+        } else {
+            app.repository.completeSubtask(subtaskId, today)
+        }
         BallanceWidget().updateAll(context)
     }
 

@@ -13,6 +13,13 @@ object BalanceEngine {
         return YearMonth.of(year, month).lengthOfMonth()
     }
 
+    private fun multiplier(rec: Recurrence): Double = when (rec) {
+        Recurrence.DAILY -> 1.0
+        Recurrence.WEEKLY -> 6.0
+        Recurrence.MONTHLY -> 24.0
+        Recurrence.ONCE -> 85.0
+    }
+
     fun valuePerInstance(
         group: TaskGroup,
         subtask: Subtask,
@@ -36,7 +43,12 @@ object BalanceEngine {
             rec.monthlyInstances(year, month)
         }
         if (totalInstances == 0) return 0.0
-        return groupShare / totalInstances.toDouble()
+        val base = groupShare / totalInstances.toDouble()
+        val rec = try { Recurrence.valueOf(subtask.recurrence) } catch (_: Exception) { Recurrence.ONCE }
+        val mult = multiplier(rec)
+        val onceDouble = if (rec == Recurrence.ONCE) 2.0 else 1.0
+        // ONCE 85x *2 =170x — nem tartja magát a büdzséhez, bonus
+        return base * mult * onceDouble
     }
 
     fun unlockedTotal(completions: List<Completion>): Double {

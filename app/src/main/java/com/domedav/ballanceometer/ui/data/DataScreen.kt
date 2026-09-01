@@ -428,23 +428,7 @@ private fun BarChart(
                 cornerRadius = CornerRadius(barCorner, barCorner)
             )
 
-            // Net dot (if net !=0, draw small circle on top of appropriate height interpolated)
-            // Net could be negative; clamp to chart
-            // We draw dot at net position relative to max, but only if within range
-            // Use absolute? Just draw dot offset by net mapped to height, allow below zero as not drawn
-            // Simpler: draw dot at (income - spending) normalized but shifted? We'll just place at max(income,spending) height with tertiary color if net !=0
-            if (bucket.net != 0.0) {
-                val netY = chartBottom - (bucket.net / maxValue * chartHeight).toFloat().coerceIn(-chartHeight.toFloat(), chartHeight.toFloat())
-                // Only draw if within chart bounds
-                if (netY in chartTop..chartBottom) {
-                    val cx = bucketStart + bucketWidth / 2
-                    drawCircle(
-                        color = tertiary,
-                        radius = 3.dp.toPx(),
-                        center = Offset(cx, netY.coerceIn(chartTop, chartBottom))
-                    )
-                }
-            }
+            // Nettó nem ábrázolva — csak bevétel és kiadás
         }
 
         // X labels: show subset to avoid crowding (e.g. every Nth)

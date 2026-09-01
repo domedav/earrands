@@ -91,10 +91,11 @@ class BallanceWidget : GlanceAppWidget() {
             TodoEntry(
                 id = st.id,
                 title = st.title,
+                groupName = group?.name ?: "",
                 isCompleted = completedTodayIds.contains(st.id),
                 value = value
             )
-        }.sortedWith(compareBy({ it.isCompleted }, { it.title }))
+        }.sortedWith(compareBy({ it.isCompleted }, { it.groupName }, { it.title }))
 
         provideContent {
             BallanceometerGlanceTheme {
@@ -234,11 +235,22 @@ private fun WidgetContent(
                 )
             }
         } else {
+            val grouped = todos.groupBy { if (it.groupName.isBlank()) context.getString(R.string.no_subtasks) else it.groupName }.toSortedMap()
             LazyColumn(
                 modifier = GlanceModifier.fillMaxWidth().defaultWeight()
             ) {
-                items(todos) { todo ->
-                    TodoRow(todo = todo, isLast = todo.id == todos.lastOrNull()?.id)
+                grouped.forEach { (groupName, list) ->
+                    item {
+                        Text(
+                            text = "— $groupName —",
+                            style = TextStyle(fontSize = 11.sp, color = GlanceTheme.colors.onSurfaceVariant, textAlign = TextAlign.Center),
+                            modifier = GlanceModifier.fillMaxWidth().padding(top = 6.dp, bottom = 2.dp)
+                        )
+                    }
+                    items(list) { todo ->
+                        TodoRow(todo = todo, isLast = todo.id == list.lastOrNull()?.id)
+                    }
+                    item { Box(modifier = GlanceModifier.fillMaxWidth().height(6.dp)) {} }
                 }
             }
         }
@@ -248,6 +260,7 @@ private fun WidgetContent(
 private data class TodoEntry(
     val id: String,
     val title: String,
+    val groupName: String,
     val isCompleted: Boolean,
     val value: Double
 )
@@ -298,14 +311,19 @@ private fun TodoRow(todo: TodoEntry, isLast: Boolean) {
                     modifier = GlanceModifier
                         .size(32.dp)
                         .cornerRadius(16.dp)
-                        .background(GlanceTheme.colors.surfaceVariant),
+                        .background(GlanceTheme.colors.secondaryContainer)
+                        .clickable(
+                            actionRunCallback<ToggleSubtaskAction>(
+                                actionParametersOf(ToggleSubtaskAction.SUBTASK_ID_KEY to todo.id)
+                            )
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
                         provider = ImageProvider(R.drawable.ic_widget_check),
                         contentDescription = null,
                         modifier = GlanceModifier.size(18.dp),
-                        colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurfaceVariant)
+                        colorFilter = ColorFilter.tint(GlanceTheme.colors.onSecondaryContainer)
                     )
                 }
             }

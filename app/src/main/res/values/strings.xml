@@ -12,7 +12,7 @@
     <string name="period_weekly">Weekly</string>
     <string name="period_monthly">Monthly</string>
     <string name="income">Income</string>
-    <string name="net">Net</string>
+    <string name="net">Balance</string>
     <string name="export_action">Export</string>
     <string name="import_action">Import</string>
     <string name="export_success">Export successful</string>
