@@ -75,7 +75,7 @@ class BallanceWidget : GlanceAppWidget() {
         val ym = YearMonth.now()
         val completedTodayIds = completions.filter { it.date == today }.map { it.subtaskId }.toSet()
 
-        val todos = subtasks.take(5).map { st ->
+        val todos = subtasks.map { st ->
             val group = groups.find { it.id == st.groupId }
             val value = if (group != null) {
                 BalanceEngine.valuePerInstance(
@@ -94,7 +94,7 @@ class BallanceWidget : GlanceAppWidget() {
                 isCompleted = completedTodayIds.contains(st.id),
                 value = value
             )
-        }.take(5)
+        }.sortedWith(compareBy({ it.isCompleted }, { it.title }))
 
         provideContent {
             BallanceometerGlanceTheme {
@@ -195,33 +195,19 @@ private fun WidgetContent(
             }
         }
 
-        // Progress bar - reflect progress via weighted Row so filled width is proportional
-        Box(
-            modifier = GlanceModifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .cornerRadius(4.dp)
-                .background(GlanceTheme.colors.surfaceVariant)
+        // Progress bar - accurate segmented meter (10% steps, Glance limitation)
+        Row(
+            modifier = GlanceModifier.fillMaxWidth().height(8.dp).cornerRadius(4.dp).background(GlanceTheme.colors.surfaceVariant)
         ) {
-            Row(
-                modifier = GlanceModifier.fillMaxSize()
-            ) {
-                if (progress > 0) {
-                    Box(
-                        modifier = GlanceModifier
-                            .defaultWeight()
-                            .height(8.dp)
-                            .cornerRadius(4.dp)
-                            .background(GlanceTheme.colors.primary)
-                    ) {}
-                }
-                if (progress < 1.0) {
-                    Box(
-                        modifier = GlanceModifier
-                            .defaultWeight()
-                            .height(8.dp)
-                    ) {}
-                }
+            val blocks = 10
+            val filledBlocks = (progress * blocks).toInt().coerceIn(0, blocks)
+            val remainderFilled = ((progress * blocks * 10).toInt() % 10) >= 5 // half-block rounding visual not needed
+            for (i in 0 until blocks) {
+                Box(
+                    modifier = GlanceModifier.defaultWeight().height(8.dp).background(
+                        if (i < filledBlocks) GlanceTheme.colors.primary else GlanceTheme.colors.surfaceVariant
+                    ).cornerRadius(4.dp)
+                ) {}
             }
         }
         Text(

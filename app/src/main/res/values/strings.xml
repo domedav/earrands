@@ -7,6 +7,19 @@
     <!-- Tabs -->
     <string name="config_tab">Config</string>
     <string name="show_tab">Show</string>
+    <string name="data_tab">Data</string>
+    <string name="period_daily">Daily</string>
+    <string name="period_weekly">Weekly</string>
+    <string name="period_monthly">Monthly</string>
+    <string name="income">Income</string>
+    <string name="net">Net</string>
+    <string name="export_action">Export</string>
+    <string name="import_action">Import</string>
+    <string name="export_success">Export successful</string>
+    <string name="import_success">Import successful</string>
+    <string name="import_confirm_title">Confirm import</string>
+    <string name="import_confirm_msg">Import will overwrite all data. Continue?</string>
+    <string name="no_data">No data yet</string>
 
     <!-- Titles -->
     <string name="show_title">Show</string>

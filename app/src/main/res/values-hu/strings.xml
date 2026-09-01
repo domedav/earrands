@@ -7,6 +7,19 @@
     <!-- Tabs -->
     <string name="config_tab">Beállítások</string>
     <string name="show_tab">Áttekintés</string>
+    <string name="data_tab">Adatok</string>
+    <string name="period_daily">Napi</string>
+    <string name="period_weekly">Heti</string>
+    <string name="period_monthly">Havi</string>
+    <string name="income">Bevétel</string>
+    <string name="net">Nettó</string>
+    <string name="export_action">Export</string>
+    <string name="import_action">Import</string>
+    <string name="export_success">Export sikeres</string>
+    <string name="import_success">Import sikeres</string>
+    <string name="import_confirm_title">Import megerősítés</string>
+    <string name="import_confirm_msg">Az import felülír minden adatot. Folytatod?</string>
+    <string name="no_data">Még nincs adat</string>
 
     <!-- Titles -->
     <string name="show_title">Áttekintés</string>

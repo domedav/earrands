@@ -68,6 +68,11 @@ fun ShowScreen(
 
     var showAddSpending by remember { mutableStateOf(false) }
 
+    val noGroupLabel = stringResource(R.string.no_subtasks)
+    val grouped = remember(todayTodos) {
+        todayTodos.groupBy { it.groupName ?: noGroupLabel }.toSortedMap()
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -132,50 +137,47 @@ fun ShowScreen(
                 }
             }
         } else {
-            items(todayTodos, key = { it.subtask.id }) { todo ->
-                Card(
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (todo.isCompletedToday) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = if (todo.isCompletedToday) 0.dp else 1.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
+            grouped.forEach { (groupName, todos) ->
+                item {
+                    Text(
+                        text = "— $groupName —",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
+                    )
+                }
+                items(todos, key = { it.subtask.id }) { todo ->
+                    Card(
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (todo.isCompletedToday) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = if (todo.isCompletedToday) 0.dp else 1.dp),
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
                     ) {
-                        IconButton(onClick = { viewModel.toggleSubtask(todo.subtask) }) {
-                            Icon(
-                                imageVector = if (todo.isCompletedToday) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked,
-                                contentDescription = null,
-                                tint = if (todo.isCompletedToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Column(modifier = Modifier.weight(1f).padding(start = 4.dp)) {
-                            Text(
-                                text = todo.subtask.title,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(onClick = { viewModel.toggleSubtask(todo.subtask) }) {
+                                Icon(
+                                    imageVector = if (todo.isCompletedToday) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked,
+                                    contentDescription = null,
+                                    tint = if (todo.isCompletedToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Column(modifier = Modifier.weight(1f).padding(start = 4.dp)) {
+                                Text(text = todo.subtask.title, style = MaterialTheme.typography.bodyLarge)
                                 Text(
                                     text = stringResource(R.string.todo_value_positive, todo.value, currency),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.primary
                                 )
-                                todo.groupName?.let {
-                                    Text(
-                                        text = it,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
                             }
                         }
                     }
                 }
+                item { Spacer(modifier = Modifier.height(8.dp)) }
             }
         }
 

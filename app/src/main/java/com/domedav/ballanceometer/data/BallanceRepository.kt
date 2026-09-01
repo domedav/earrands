@@ -8,7 +8,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 class BallanceRepository(
-    private val db: BallanceDatabase
+    val db: BallanceDatabase
 ) {
     private val appConfigDao = db.appConfigDao()
     private val taskGroupDao = db.taskGroupDao()
