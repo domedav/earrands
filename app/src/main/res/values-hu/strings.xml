@@ -1,0 +1,87 @@
+<resources>
+    <string name="app_name">Ballanceometer</string>
+    <string name="widget_title">Ballanceometer</string>
+    <string name="widget_description">Feloldott egyenleg egy pillantásra</string>
+    <string name="ballanceometer_widget">Ballanceometer widget</string>
+
+    <!-- Tabs -->
+    <string name="config_tab">Beállítások</string>
+    <string name="show_tab">Áttekintés</string>
+
+    <!-- Titles -->
+    <string name="show_title">Áttekintés</string>
+    <string name="config_title">Beállítások</string>
+
+    <!-- Balance -->
+    <string name="total_balance">Teljes keret</string>
+    <string name="minimal_spend">Minimális költés</string>
+    <string name="available_balance">Elérhető egyenleg</string>
+    <string name="unlocked_balance">Feloldott egyenleg</string>
+    <string name="spent_balance">Elköltött egyenleg</string>
+    <string name="remaining_balance">Fennmaradó egyenleg</string>
+    <string name="balance_config_title">Egyenleg beállítások</string>
+    <string name="total_balance_label">Havi teljes keret</string>
+    <string name="minimal_spend_label">Minimális havi költés</string>
+    <string name="currency_label">Pénznem: %1$s</string>
+    <string name="available_label">Elérhető</string>
+    <string name="unlocked_percent">%1$d%% feloldva</string>
+    <string name="minimal_total_label">Minimális • Összes</string>
+    <string name="amount_with_currency">Összeg (%1$s)</string>
+    <string name="available_value">%1$.0f %2$s</string>
+    <string name="unlocked_earnable_value">%1$.0f / %2$.0f %3$s</string>
+    <string name="minimal_total_value">%1$.0f • %2$.0f %3$s</string>
+    <string name="widget_progress">%1$.0f / %2$.0f %3$s (%4$.0f%%)</string>
+
+    <!-- Groups / Subtasks / Todos -->
+    <string name="today_todos">Mai teendők</string>
+    <string name="today_title">Ma</string>
+    <string name="today_empty">Nincs feladat — adj hozzá csoportokat a Beállításokban</string>
+    <string name="groups_title">Csoportok</string>
+    <string name="add_group">Csoport hozzáadása</string>
+    <string name="add_subtask">Részfeladat hozzáadása</string>
+    <string name="edit_subtask_title">Részfeladat szerkesztése</string>
+    <string name="no_subtasks">Nincsenek részfeladatok</string>
+    <string name="subtask_title">Részfeladat</string>
+    <string name="weight">Súly</string>
+    <string name="weight_label">Súly</string>
+    <string name="weight_range_label">Súly 0-100</string>
+    <string name="name_label">Név</string>
+    <string name="title_label">Cím</string>
+    <string name="recurrence_label">Ismétlődés</string>
+    <string name="recurrence_once">Egyszeri</string>
+    <string name="recurrence_daily">Napi</string>
+    <string name="recurrence_weekly">Heti</string>
+    <string name="recurrence_monthly">Havi</string>
+
+    <!-- Spending -->
+    <string name="spending">Kiadás</string>
+    <string name="spendings_title">Kiadások</string>
+    <string name="add_spending">Kiadás hozzáadása</string>
+    <string name="add_spending_title">Kiadás hozzáadása</string>
+    <string name="amount">Összeg</string>
+    <string name="amount_label">Összeg</string>
+    <string name="note">Megjegyzés</string>
+    <string name="note_label">Megjegyzés</string>
+    <string name="note_optional">Megjegyzés (opcionális)</string>
+    <string name="amount_error">Adj meg érvényes összeget &gt; 0</string>
+    <string name="no_spendings">Még nincsenek kiadások</string>
+    <string name="subtract_action">Levonás</string>
+    <string name="delete_spending_desc">Kiadás törlése</string>
+    <string name="spending_value_negative">- %1$.0f %2$s</string>
+    <string name="todo_value_positive">+%1$.0f %2$s</string>
+    <string name="counter_fraction">%1$d/%2$d</string>
+
+    <!-- Common actions -->
+    <string name="save">Mentés</string>
+    <string name="cancel">Mégse</string>
+    <string name="delete">Törlés</string>
+    <string name="edit">Szerkesztés</string>
+    <string name="add">Hozzáadás</string>
+
+    <!-- Generic -->
+    <string name="empty_tasks">Még nincsenek feladatok</string>
+    <string name="widget_empty">Nincs adat</string>
+    <string name="widget_error">Hiba a betöltéskor</string>
+    <string name="widget_loading">Betöltés…</string>
+    <string name="open_app">Alkalmazás megnyitása</string>
+</resources>
