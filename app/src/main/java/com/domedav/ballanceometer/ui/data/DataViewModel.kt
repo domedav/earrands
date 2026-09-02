@@ -1,10 +1,13 @@
 package com.domedav.ballanceometer.ui.data
 
 import android.app.Application
-import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import android.content.Context
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import com.domedav.ballanceometer.BallanceometerApp
 import com.domedav.ballanceometer.data.AppConfig
 import com.domedav.ballanceometer.data.BallanceDatabase
@@ -20,6 +23,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.DayOfWeek
 import java.time.Instant
@@ -40,10 +44,22 @@ data class Bucket(
     val net: Double
 )
 
+private val Context.dataStore by preferencesDataStore(name = "ballanceometer_prefs")
+
 class DataViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = (application as BallanceometerApp).repository
     private val db: BallanceDatabase = BallanceDatabase.getInstance(application)
+    private val dataStore = application.dataStore
+    private val periodKey = stringPreferencesKey("data_period")
+
+    val savedPeriod: StateFlow<Period> = dataStore.data
+        .map { prefs -> try { Period.valueOf(prefs[periodKey] ?: Period.DAILY.name) } catch (_: Exception) { Period.DAILY } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Period.DAILY)
+
+    fun savePeriod(period: Period) {
+        viewModelScope.launch { dataStore.edit { it[periodKey] = period.name } }
+    }
 
     val config: StateFlow<AppConfig?> = repository.config
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)

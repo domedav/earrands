@@ -71,11 +71,15 @@ class BallanceWidget : GlanceAppWidget() {
         val available = BalanceEngine.available(minimal, unlocked, spendings)
         val progress = if (earnable > 0) (unlocked / earnable).coerceIn(0.0, 1.0) else 0.0
 
-        val today = LocalDate.now().toString()
+        val todayDate = LocalDate.now()
+        val today = todayDate.toString()
         val ym = YearMonth.now()
         val completedTodayIds = completions.filter { it.date == today }.map { it.subtaskId }.toSet()
+        val completionsBySubtask = completions.groupBy { it.subtaskId }.mapValues { it.value.map { c -> c.date } }
 
-        val todos = subtasks.map { st ->
+        val todos = subtasks.mapNotNull { st ->
+            val rec = try { com.domedav.ballanceometer.data.Recurrence.valueOf(st.recurrence) } catch (_: Exception) { com.domedav.ballanceometer.data.Recurrence.DAILY }
+            if (!rec.isDue(st.createdAt, todayDate, completionsBySubtask[st.id] ?: emptyList())) return@mapNotNull null
             val group = groups.find { it.id == st.groupId }
             val value = if (group != null) {
                 BalanceEngine.valuePerInstance(

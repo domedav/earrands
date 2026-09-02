@@ -74,12 +74,16 @@ class ShowViewModel(application: Application) : AndroidViewModel(application) {
     val todayTodos: StateFlow<List<TodayTodo>> = combine(
         groups, subtasks, completions, config
     ) { grps, subs, comps, cfg ->
-        val today = LocalDate.now().toString()
+        val todayDate = LocalDate.now()
+        val today = todayDate.toString()
         val ym = YearMonth.now()
         val earnableVal = if (cfg != null) maxOf(0.0, cfg.totalBalance - cfg.minimalSpend) else 0.0
         val completionsTodayIds = comps.filter { it.date == today }.map { it.subtaskId }.toSet()
+        val completionsBySubtask = comps.groupBy { it.subtaskId }.mapValues { it.value.map { c -> c.date } }
         val groupNameById = grps.associate { it.id to it.name }
-        subs.map { st ->
+        subs.mapNotNull { st ->
+            val rec = try { com.domedav.ballanceometer.data.Recurrence.valueOf(st.recurrence) } catch (_: Exception) { com.domedav.ballanceometer.data.Recurrence.DAILY }
+            if (!rec.isDue(st.createdAt, todayDate, completionsBySubtask[st.id] ?: emptyList())) return@mapNotNull null
             val isCompleted = completionsTodayIds.contains(st.id)
             val group = grps.find { it.id == st.groupId }
             val value = if (group != null) {

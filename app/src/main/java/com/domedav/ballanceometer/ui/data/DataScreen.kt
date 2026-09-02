@@ -64,7 +64,10 @@ fun DataScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var period by remember { mutableStateOf(Period.DAILY) }
+    val savedPeriod by viewModel.savedPeriod.collectAsState()
+    var period by remember { mutableStateOf(savedPeriod) }
+    // sync from datastore
+    androidx.compose.runtime.LaunchedEffect(savedPeriod) { period = savedPeriod }
 
     val config by viewModel.config.collectAsState()
     val currency = config?.currency ?: "HUF"
@@ -112,7 +115,10 @@ fun DataScreen(
             item {
                 PeriodSelector(
                     selected = period,
-                    onSelected = { period = it }
+                    onSelected = {
+                        period = it
+                        viewModel.savePeriod(it)
+                    }
                 )
             }
 
