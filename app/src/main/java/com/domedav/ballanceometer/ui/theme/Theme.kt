@@ -81,11 +81,3 @@ fun BallanceometerTheme(
         content = content
     )
 }
-
-@Deprecated("Use BallanceometerTheme instead", ReplaceWith("BallanceometerTheme"))
-@Composable
-fun MiniTaskListTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
-) = BallanceometerTheme(darkTheme, dynamicColor, content)

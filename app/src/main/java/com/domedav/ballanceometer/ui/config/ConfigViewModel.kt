@@ -40,7 +40,7 @@ class ConfigViewModel(application: Application) : AndroidViewModel(application) 
                 }
             }
         } catch (_: Exception) { }
-        // fallback: try MinitasklistApp pattern or direct DB
+        // fallback: direct DB access
         BallanceRepository(BallanceDatabase.getInstance(application))
     }
 

@@ -1,4 +1,4 @@
-# R8 rules for minitasklist
+# R8 rules for Ballanceometer
 
 # Prevent class renaming (breaks Glance resource lookups by launcher)
 -dontobfuscate
@@ -13,7 +13,7 @@
 }
 
 # Glance / Widget (ActionCallback invoked by class name from widget host)
--keep class com.domedav.minitasklist.widget.** { *; }
+-keep class com.domedav.ballanceometer.widget.** { *; }
 -keep class androidx.glance.** { *; }
 
 # Preserve R classes (resource lookups)

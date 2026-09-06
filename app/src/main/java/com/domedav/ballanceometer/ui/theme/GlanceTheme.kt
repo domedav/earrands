@@ -21,10 +21,3 @@ fun BallanceometerGlanceTheme(
         )
     }
 }
-
-@Deprecated("Use BallanceometerGlanceTheme instead", ReplaceWith("BallanceometerGlanceTheme"))
-@Composable
-fun MiniTaskListGlanceTheme(
-    dynamicColor: Boolean = true,
-    content: @Composable @GlanceComposable () -> Unit
-) = BallanceometerGlanceTheme(dynamicColor, content)
