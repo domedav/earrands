@@ -85,4 +85,113 @@ class BalanceEngineTest {
         assertEquals(8500.0, BalanceEngine.available(5000.0, 5000.0, spendings), 0.0)
         assertEquals(5000.0, BalanceEngine.available(5000.0, 0.0, emptyList()), 0.0)
     }
+
+    @Test
+    fun overspend_canDriveAvailableNegative() {
+        // Documents current behavior: no floor at zero
+        val spendings = listOf(Spending("s1", 8000.0, "", 0L))
+        assertEquals(-2000.0, BalanceEngine.available(5000.0, 1000.0, spendings), 0.0)
+    }
+
+    @Test
+    fun earnableZero_givesZeroValue() {
+        val groups = listOf(group("g1", 100f))
+        val subs = listOf(subtask("s1", "g1", "DAILY"))
+        val value = BalanceEngine.valuePerInstance(
+            group = groups[0], subtask = subs[0],
+            allGroups = groups, allSubtasks = subs,
+            year = 2026, month = 1, earnable = 0.0
+        )
+        assertEquals(0.0, value, 0.0)
+    }
+
+    @Test
+    fun groupWithoutSubtasks_givesZeroValue() {
+        val groups = listOf(group("g1", 100f))
+        val value = BalanceEngine.valuePerInstance(
+            group = groups[0], subtask = subtask("s1", "g1", "DAILY"),
+            allGroups = groups, allSubtasks = emptyList(),
+            year = 2026, month = 1, earnable = 10_000.0
+        )
+        assertEquals(0.0, value, 0.0)
+    }
+
+    @Test
+    fun multipleSubtasks_shareGroupInstances() {
+        // Two DAILY subtasks in January (31 days) -> 62 instances, each worth 10000/62
+        val groups = listOf(group("g1", 100f))
+        val subs = listOf(subtask("s1", "g1", "DAILY"), subtask("s2", "g1", "DAILY"))
+        for (s in subs) {
+            val value = BalanceEngine.valuePerInstance(
+                group = groups[0], subtask = s,
+                allGroups = groups, allSubtasks = subs,
+                year = 2026, month = 1, earnable = 10_000.0
+            )
+            assertEquals(10_000.0 / 62, value, 0.001)
+        }
+    }
+
+    @Test
+    fun weeklyMultiplier_appliesSixTimes() {
+        // January 2026: 31 days -> 5 weekly instances; 10000/5 base * 6
+        val groups = listOf(group("g1", 100f))
+        val subs = listOf(subtask("s1", "g1", "WEEKLY"))
+        val value = BalanceEngine.valuePerInstance(
+            group = groups[0], subtask = subs[0],
+            allGroups = groups, allSubtasks = subs,
+            year = 2026, month = 1, earnable = 10_000.0
+        )
+        assertEquals(2000.0 * 6, value, 0.001)
+    }
+
+    @Test
+    fun monthlyMultiplier_appliesTwentyFourTimes() {
+        val groups = listOf(group("g1", 100f))
+        val subs = listOf(subtask("s1", "g1", "MONTHLY"))
+        val value = BalanceEngine.valuePerInstance(
+            group = groups[0], subtask = subs[0],
+            allGroups = groups, allSubtasks = subs,
+            year = 2026, month = 1, earnable = 10_000.0
+        )
+        assertEquals(10_000.0 * 24, value, 0.001)
+    }
+
+    @Test
+    fun onceMultiplier_appliesBonus() {
+        // ONCE: 85x * 2 bonus = 170x (intentional bonus, may exceed earnable)
+        val groups = listOf(group("g1", 100f))
+        val subs = listOf(subtask("s1", "g1", "ONCE"))
+        val value = BalanceEngine.valuePerInstance(
+            group = groups[0], subtask = subs[0],
+            allGroups = groups, allSubtasks = subs,
+            year = 2026, month = 1, earnable = 10_000.0
+        )
+        assertEquals(10_000.0 * 170, value, 0.001)
+    }
+
+    @Test
+    fun unknownRecurrence_fallsBackToOnce() {
+        val groups = listOf(group("g1", 100f))
+        val bogus = subtask("s1", "g1", "BOGUS")
+        val once = subtask("s1", "g1", "ONCE")
+        val vBogus = BalanceEngine.valuePerInstance(
+            group = groups[0], subtask = bogus,
+            allGroups = groups, allSubtasks = listOf(bogus),
+            year = 2026, month = 1, earnable = 10_000.0
+        )
+        val vOnce = BalanceEngine.valuePerInstance(
+            group = groups[0], subtask = once,
+            allGroups = groups, allSubtasks = listOf(once),
+            year = 2026, month = 1, earnable = 10_000.0
+        )
+        assertEquals(vOnce, vBogus, 0.0)
+    }
+
+    @Test
+    fun daysInMonth_handlesLeapFebruary() {
+        assertEquals(31, BalanceEngine.daysInMonth(2026, 1))
+        assertEquals(28, BalanceEngine.daysInMonth(2026, 2))
+        assertEquals(29, BalanceEngine.daysInMonth(2024, 2))
+        assertEquals(30, BalanceEngine.daysInMonth(2026, 4))
+    }
 }

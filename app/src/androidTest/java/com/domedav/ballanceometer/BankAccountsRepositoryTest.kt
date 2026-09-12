@@ -167,4 +167,52 @@ class BankAccountsRepositoryTest {
         assertNull(spendings[0].accountId)
         assertNotNull(spendings[0].id)
     }
+
+    // ---- Negative / edge cases ----
+
+    @Test
+    fun topUp_zeroOrNegativeAmountIsIgnored() = runTest {
+        repo.addAccount(BankAccount(id = "a1", name = "OTP", balance = 100_000.0))
+        repo.topUpAccount("a1", 0.0)
+        repo.topUpAccount("a1", -50_000.0)
+        assertEquals(100_000.0, balanceOf("a1"), 0.0)
+    }
+
+    @Test
+    fun setMainAccount_unknownIdKeepsCurrentMain() = runTest {
+        repo.addAccount(BankAccount(id = "a1", name = "OTP", balance = 100_000.0))
+        repo.setMainAccount("ghost")
+        val all = accounts()
+        assertEquals(1, all.size)
+        assertTrue(all[0].isMain)
+    }
+
+    @Test
+    fun updateAccount_canRenameAndRebalance() = runTest {
+        repo.addAccount(BankAccount(id = "a1", name = "OTP", balance = 100_000.0))
+        repo.updateAccount(BankAccount(id = "a1", name = "OTP Prime", balance = 80_000.0, isMain = true))
+        val updated = accounts()[0]
+        assertEquals("OTP Prime", updated.name)
+        assertEquals(80_000.0, updated.balance, 0.0)
+        assertTrue(updated.isMain)
+    }
+
+    @Test
+    fun spending_withUnknownAccountId_balanceOfRealAccountsUntouched() = runTest {
+        repo.addAccount(BankAccount(id = "a1", name = "OTP", balance = 100_000.0))
+        // Explicit bogus id is kept as-is (documents behavior); no real balance moves
+        repo.addSpending(
+            Spending(id = UUID.randomUUID().toString(), amount = 5_000.0, timestamp = 0L, accountId = "ghost")
+        )
+        assertEquals(100_000.0, balanceOf("a1"), 0.0)
+        assertEquals("ghost", repo.spendings.first()[0].accountId)
+    }
+
+    @Test
+    fun deleteSpending_withoutAccount_onlyDisappears() = runTest {
+        repo.addSpending(Spending(id = UUID.randomUUID().toString(), amount = 5_000.0, timestamp = 0L))
+        repo.deleteSpending(repo.spendings.first()[0])
+        assertTrue(repo.spendings.first().isEmpty())
+        assertTrue(accounts().isEmpty())
+    }
 }

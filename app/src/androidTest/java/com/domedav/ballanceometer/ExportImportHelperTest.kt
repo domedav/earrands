@@ -43,8 +43,7 @@ class ExportImportHelperTest {
     }
 
     @Test
-    fun parseV1Export_defaultsToEmptyAccountsAndNullAccountId() {
-        // v1 format: no bankAccounts array, no accountId on spendings
+    fun parseV1Export_defaultsToEmptyAccountsAndNullAccountId() {        // v1 format: no bankAccounts array, no accountId on spendings
         val json = """
             {
               "version": 1,
@@ -61,5 +60,59 @@ class ExportImportHelperTest {
         assertTrue(parsed.bankAccounts.isEmpty())
         assertEquals(1, parsed.spendings.size)
         assertNull(parsed.spendings[0].accountId)
+    }
+
+    @Test
+    fun fullRoundTrip_preservesGroupsSubtasksAndCompletions() {
+        val groups = listOf(
+            com.domedav.ballanceometer.data.TaskGroup(
+                id = "g1", name = "Health", weight = 60f, createdAt = 100L
+            )
+        )
+        val subtasks = listOf(
+            com.domedav.ballanceometer.data.Subtask(
+                id = "s1", groupId = "g1", title = "Run",
+                recurrence = "DAILY", createdAt = 101L
+            )
+        )
+        val completions = listOf(
+            com.domedav.ballanceometer.data.Completion(
+                id = "c1", subtaskId = "s1", date = "2026-09-12",
+                completedAt = 102L, valueUnlocked = 322.0
+            )
+        )
+
+        val json = ExportImportHelper.buildExportJson(
+            config = null, groups = groups, subtasks = subtasks,
+            completions = completions, spendings = emptyList(), bankAccounts = emptyList()
+        )
+        val parsed = ExportImportHelper.parseImportJson(json.toString())
+
+        assertNull(parsed.config)
+        assertEquals(groups, parsed.groups)
+        assertEquals(subtasks, parsed.subtasks)
+        assertEquals(completions, parsed.completions)
+        assertTrue(parsed.spendings.isEmpty())
+    }
+
+    @Test(expected = org.json.JSONException::class)
+    fun parseInvalidJson_throws() {
+        ExportImportHelper.parseImportJson("this is not json {")
+    }
+
+    @Test
+    fun exportEmpty_everythingParsesBackEmpty() {
+        val json = ExportImportHelper.buildExportJson(
+            config = null, groups = emptyList(), subtasks = emptyList(),
+            completions = emptyList(), spendings = emptyList(), bankAccounts = emptyList()
+        )
+        val parsed = ExportImportHelper.parseImportJson(json.toString())
+
+        assertNull(parsed.config)
+        assertTrue(parsed.groups.isEmpty())
+        assertTrue(parsed.subtasks.isEmpty())
+        assertTrue(parsed.completions.isEmpty())
+        assertTrue(parsed.spendings.isEmpty())
+        assertTrue(parsed.bankAccounts.isEmpty())
     }
 }
