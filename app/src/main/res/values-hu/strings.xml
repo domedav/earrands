@@ -26,19 +26,19 @@
     <string name="config_title">Beállítások</string>
 
     <!-- Balance -->
-    <string name="total_balance">Teljes keret</string>
-    <string name="minimal_spend">Minimális költés</string>
+    <string name="total_balance">Havi bevétel</string>
+    <string name="minimal_spend">Minimális keret</string>
     <string name="available_balance">Elérhető egyenleg</string>
     <string name="unlocked_balance">Feloldott egyenleg</string>
     <string name="spent_balance">Elköltött egyenleg</string>
     <string name="remaining_balance">Fennmaradó egyenleg</string>
     <string name="balance_config_title">Egyenleg beállítások</string>
-    <string name="total_balance_label">Havi teljes keret</string>
-    <string name="minimal_spend_label">Minimális havi költés</string>
+    <string name="total_balance_label">Havi bevétel</string>
+    <string name="minimal_spend_label">Minimális keret</string>
     <string name="currency_label">Pénznem: %1$s</string>
     <string name="available_label">Elérhető</string>
     <string name="unlocked_percent">%1$d%% feloldva</string>
-    <string name="minimal_total_label">Minimális • Összes</string>
+    <string name="minimal_total_label">Keret • Bevétel</string>
     <string name="amount_with_currency">Összeg (%1$s)</string>
     <string name="available_value">%1$.0f %2$s</string>
     <string name="unlocked_earnable_value">%1$.0f / %2$.0f %3$s</string>
@@ -83,6 +83,27 @@
     <string name="spending_value_negative">- %1$.0f %2$s</string>
     <string name="todo_value_positive">+%1$.0f %2$s</string>
     <string name="counter_fraction">%1$d/%2$d</string>
+
+    <!-- Bank accounts -->
+    <string name="accounts_title">Számláim</string>
+    <string name="accounts_badge">Számlák</string>
+    <string name="accounts_total_value">Összesen: %1$.0f %2$s</string>
+    <string name="accounts_missing">Hiányos számla</string>
+    <string name="no_accounts">Még nincs számla megadva — add hozzá az elsőt!</string>
+    <string name="add_account">Számla hozzáadása</string>
+    <string name="edit_account_title">Számla szerkesztése</string>
+    <string name="account_name_label">Számla neve</string>
+    <string name="account_balance_label">Aktuális egyenleg (%1$s)</string>
+    <string name="main_account">Főszámla</string>
+    <string name="set_as_main">Főszámlává tesz</string>
+    <string name="topup_title">Jóváírás (pl. havi fizetés)</string>
+    <string name="topup_action">Jóváír</string>
+    <string name="delete_account_desc">Számla törlése</string>
+    <string name="delete_account_confirm_title">Számla törlése</string>
+    <string name="delete_account_confirm_msg">A számla költései átkerülnek a főszámlára. Biztosan törlöd?</string>
+    <string name="delete_last_account_confirm_msg">Ez az utolsó számla — a költések megmaradnak, de nem lesz mihez kötve. Biztosan törlöd?</string>
+    <string name="account_for_spending">Melyik számláról?</string>
+    <string name="account_balance_value">%1$.0f %2$s</string>
 
     <!-- Common actions -->
     <string name="save">Mentés</string>

@@ -26,19 +26,19 @@
     <string name="config_title">Config</string>
 
     <!-- Balance -->
-    <string name="total_balance">Total Balance</string>
-    <string name="minimal_spend">Minimal Spend</string>
+    <string name="total_balance">Monthly Income</string>
+    <string name="minimal_spend">Minimal Allowance</string>
     <string name="available_balance">Available Balance</string>
     <string name="unlocked_balance">Unlocked Balance</string>
     <string name="spent_balance">Spent Balance</string>
     <string name="remaining_balance">Remaining Balance</string>
     <string name="balance_config_title">Balance Config</string>
-    <string name="total_balance_label">Total Monthly Balance</string>
-    <string name="minimal_spend_label">Minimal Monthly Spend</string>
+    <string name="total_balance_label">Monthly Income</string>
+    <string name="minimal_spend_label">Minimal Allowance</string>
     <string name="currency_label">Currency: %1$s</string>
     <string name="available_label">Available</string>
     <string name="unlocked_percent">%1$d%% unlocked</string>
-    <string name="minimal_total_label">Minimal • Total</string>
+    <string name="minimal_total_label">Allowance • Income</string>
     <string name="amount_with_currency">Amount (%1$s)</string>
     <string name="available_value">%1$.0f %2$s</string>
     <string name="unlocked_earnable_value">%1$.0f / %2$.0f %3$s</string>
