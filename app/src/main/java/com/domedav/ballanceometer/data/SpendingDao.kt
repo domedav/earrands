@@ -17,4 +17,10 @@ interface SpendingDao {
 
     @Delete
     suspend fun delete(spending: Spending)
+
+    @Query("SELECT * FROM spendings WHERE accountId = :accountId")
+    suspend fun getByAccount(accountId: String): List<Spending>
+
+    @Query("UPDATE spendings SET accountId = :newAccountId WHERE accountId = :oldAccountId")
+    suspend fun reassignAccount(oldAccountId: String, newAccountId: String?)
 }

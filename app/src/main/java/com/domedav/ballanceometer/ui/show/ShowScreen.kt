@@ -32,6 +32,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -47,7 +51,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.domedav.ballanceometer.R
+import com.domedav.ballanceometer.data.BankAccount
 import com.domedav.ballanceometer.data.Spending
+import com.domedav.ballanceometer.ui.accounts.AccountsSheet
 import com.domedav.ballanceometer.ui.components.BalanceMeter
 
 @Composable
@@ -61,12 +67,15 @@ fun ShowScreen(
     val unlocked by viewModel.unlocked.collectAsState()
     val earnable by viewModel.earnable.collectAsState()
     val progress by viewModel.progress.collectAsState()
+    val bankAccounts by viewModel.bankAccounts.collectAsState()
+    val mainAccount by viewModel.mainAccount.collectAsState()
 
     val minimal = config?.minimalSpend ?: 0.0
     val total = config?.totalBalance ?: 0.0
     val currency = config?.currency ?: "HUF"
 
     var showAddSpending by remember { mutableStateOf(false) }
+    var showAccounts by remember { mutableStateOf(false) }
 
     val noGroupLabel = stringResource(R.string.no_subtasks)
     val grouped = remember(todayTodos) {
@@ -87,7 +96,9 @@ fun ShowScreen(
                 minimal = minimal,
                 total = total,
                 currency = currency,
-                spent = spendings.sumOf { it.amount }
+                spent = spendings.sumOf { it.amount },
+                hasAccounts = bankAccounts.isNotEmpty(),
+                onAccountsClick = { showAccounts = true }
             )
         }
 
@@ -235,11 +246,26 @@ fun ShowScreen(
     if (showAddSpending) {
         AddSpendingDialog(
             currency = currency,
+            accounts = bankAccounts,
+            mainAccountId = mainAccount?.id,
             onDismiss = { showAddSpending = false },
-            onConfirm = { amount, note ->
-                viewModel.addSpending(amount, note)
+            onConfirm = { amount, note, accountId ->
+                viewModel.addSpending(amount, note, accountId)
                 showAddSpending = false
             }
+        )
+    }
+
+    if (showAccounts) {
+        AccountsSheet(
+            accounts = bankAccounts,
+            currency = currency,
+            onDismiss = { showAccounts = false },
+            onAdd = { name, balance -> viewModel.addAccount(name, balance) },
+            onUpdate = { account -> viewModel.updateAccount(account) },
+            onDelete = { account -> viewModel.deleteAccount(account) },
+            onSetMain = { id -> viewModel.setMainAccount(id) },
+            onTopUp = { id, amount -> viewModel.topUpAccount(id, amount) }
         )
     }
 }
@@ -287,16 +313,26 @@ private fun SpendingRow(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddSpendingDialog(
     currency: String,
+    accounts: List<BankAccount>,
+    mainAccountId: String?,
     onDismiss: () -> Unit,
-    onConfirm: (Double, String) -> Unit
+    onConfirm: (Double, String, String?) -> Unit
 ) {
     var amountText by remember { mutableStateOf("") }
     var noteText by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     val amountErrorText = stringResource(R.string.amount_error)
+
+    // Default to the main account; fall back to the first one
+    var selectedAccountId by remember(accounts, mainAccountId) {
+        mutableStateOf(mainAccountId ?: accounts.firstOrNull()?.id)
+    }
+    var accountMenuExpanded by remember { mutableStateOf(false) }
+    val selectedAccount = accounts.find { it.id == selectedAccountId }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -318,6 +354,45 @@ private fun AddSpendingDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
+                if (accounts.isNotEmpty()) {
+                    ExposedDropdownMenuBox(
+                        expanded = accountMenuExpanded,
+                        onExpandedChange = { accountMenuExpanded = it }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedAccount?.name ?: "",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text(stringResource(R.string.account_for_spending)) },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = accountMenuExpanded)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(),
+                            singleLine = true
+                        )
+                        ExposedDropdownMenu(
+                            expanded = accountMenuExpanded,
+                            onDismissRequest = { accountMenuExpanded = false }
+                        ) {
+                            accounts.forEach { account ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            if (account.isMain) "${account.name} ★"
+                                            else account.name
+                                        )
+                                    },
+                                    onClick = {
+                                        selectedAccountId = account.id
+                                        accountMenuExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
                 if (error != null) {
                     Text(
                         text = error!!,
@@ -335,7 +410,7 @@ private fun AddSpendingDialog(
                         error = amountErrorText
                         return@TextButton
                     }
-                    onConfirm(amount, noteText.trim())
+                    onConfirm(amount, noteText.trim(), selectedAccountId)
                 }
             ) {
                 Text(stringResource(R.string.add))

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.domedav.ballanceometer.BallanceometerApp
 import com.domedav.ballanceometer.data.AppConfig
 import com.domedav.ballanceometer.data.BallanceRepository
+import com.domedav.ballanceometer.data.BankAccount
 import com.domedav.ballanceometer.data.Completion
 import com.domedav.ballanceometer.data.Spending
 import com.domedav.ballanceometer.data.Subtask
@@ -48,6 +49,13 @@ class ShowViewModel(application: Application) : AndroidViewModel(application) {
 
     val spendings: StateFlow<List<Spending>> = repository.spendings
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val bankAccounts: StateFlow<List<BankAccount>> = repository.bankAccounts
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val mainAccount: StateFlow<BankAccount?> = bankAccounts
+        .map { list -> list.find { it.isMain } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     // Derived: earnable = max(0, totalBalance - minimalSpend)
     val earnable: StateFlow<Double> = config
@@ -122,14 +130,15 @@ class ShowViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addSpending(amount: Double, note: String) {
+    fun addSpending(amount: Double, note: String, accountId: String? = null) {
         if (amount <= 0) return
         viewModelScope.launch {
             val spending = Spending(
                 id = UUID.randomUUID().toString(),
                 amount = amount,
                 note = note,
-                timestamp = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis(),
+                accountId = accountId
             )
             repository.addSpending(spending)
             BallanceWidgetUpdater.enqueueImmediate(getApplication())
@@ -139,6 +148,45 @@ class ShowViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteSpending(spending: Spending) {
         viewModelScope.launch {
             repository.deleteSpending(spending)
+            BallanceWidgetUpdater.enqueueImmediate(getApplication())
+        }
+    }
+
+    // ---- Bank accounts (pure balance tracking, unlock math untouched) ----
+
+    fun addAccount(name: String, balance: Double) {
+        if (name.isBlank()) return
+        viewModelScope.launch {
+            repository.addAccount(BankAccount(name = name.trim(), balance = balance))
+            BallanceWidgetUpdater.enqueueImmediate(getApplication())
+        }
+    }
+
+    fun updateAccount(account: BankAccount) {
+        viewModelScope.launch {
+            repository.updateAccount(account)
+            BallanceWidgetUpdater.enqueueImmediate(getApplication())
+        }
+    }
+
+    fun deleteAccount(account: BankAccount) {
+        viewModelScope.launch {
+            repository.deleteAccount(account)
+            BallanceWidgetUpdater.enqueueImmediate(getApplication())
+        }
+    }
+
+    fun setMainAccount(accountId: String) {
+        viewModelScope.launch {
+            repository.setMainAccount(accountId)
+            BallanceWidgetUpdater.enqueueImmediate(getApplication())
+        }
+    }
+
+    fun topUpAccount(accountId: String, amount: Double) {
+        if (amount <= 0) return
+        viewModelScope.launch {
+            repository.topUpAccount(accountId, amount)
             BallanceWidgetUpdater.enqueueImmediate(getApplication())
         }
     }

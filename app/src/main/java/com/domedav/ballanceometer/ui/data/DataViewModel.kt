@@ -192,8 +192,9 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
             val subtasks = repository.subtasks.first()
             val completionsList = repository.completions.first()
             val spendingsList = repository.spendings.first()
+            val accountsList = repository.bankAccounts.first()
 
-            val json = ExportImportHelper.buildExportJson(cfg, groups, subtasks, completionsList, spendingsList)
+            val json = ExportImportHelper.buildExportJson(cfg, groups, subtasks, completionsList, spendingsList, accountsList)
             val jsonString = json.toString(2)
 
             context.contentResolver.openOutputStream(uri, "wt")?.use { out ->
@@ -236,6 +237,9 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
             }
             for (s in parsed.spendings) {
                 db.spendingDao().insert(s)
+            }
+            for (a in parsed.bankAccounts) {
+                db.bankAccountDao().insert(a)
             }
 
             BallanceWidgetUpdater.enqueueImmediate(context.applicationContext)

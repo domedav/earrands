@@ -6,8 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [AppConfig::class, TaskGroup::class, Subtask::class, Completion::class, Spending::class],
-    version = 3,
+    entities = [AppConfig::class, TaskGroup::class, Subtask::class, Completion::class, Spending::class, BankAccount::class],
+    version = 4,
     exportSchema = false
 )
 abstract class BallanceDatabase : RoomDatabase() {
@@ -16,6 +16,7 @@ abstract class BallanceDatabase : RoomDatabase() {
     abstract fun subtaskDao(): SubtaskDao
     abstract fun completionDao(): CompletionDao
     abstract fun spendingDao(): SpendingDao
+    abstract fun bankAccountDao(): BankAccountDao
 
     companion object {
         @Volatile

@@ -5,14 +5,15 @@ import org.json.JSONObject
 
 object ExportImportHelper {
 
-    const val VERSION = 1
+    const val VERSION = 2
 
     fun buildExportJson(
         config: AppConfig?,
         groups: List<TaskGroup>,
         subtasks: List<Subtask>,
         completions: List<Completion>,
-        spendings: List<Spending>
+        spendings: List<Spending>,
+        bankAccounts: List<BankAccount> = emptyList()
     ): JSONObject {
         val root = JSONObject()
         root.put("version", VERSION)
@@ -70,9 +71,22 @@ object ExportImportHelper {
             o.put("amount", s.amount)
             o.put("note", s.note)
             o.put("timestamp", s.timestamp)
+            if (s.accountId != null) o.put("accountId", s.accountId) else o.put("accountId", JSONObject.NULL)
             spendingsArr.put(o)
         }
         root.put("spendings", spendingsArr)
+
+        val accountsArr = JSONArray()
+        for (a in bankAccounts) {
+            val o = JSONObject()
+            o.put("id", a.id)
+            o.put("name", a.name)
+            o.put("balance", a.balance)
+            o.put("isMain", a.isMain)
+            o.put("createdAt", a.createdAt)
+            accountsArr.put(o)
+        }
+        root.put("bankAccounts", accountsArr)
 
         return root
     }
@@ -82,7 +96,8 @@ object ExportImportHelper {
         val groups: List<TaskGroup>,
         val subtasks: List<Subtask>,
         val completions: List<Completion>,
-        val spendings: List<Spending>
+        val spendings: List<Spending>,
+        val bankAccounts: List<BankAccount> = emptyList()
     )
 
     fun parseImportJson(jsonString: String): ParsedData {
@@ -160,12 +175,31 @@ object ExportImportHelper {
                         id = o.getString("id"),
                         amount = o.optDouble("amount", 0.0),
                         note = o.optString("note", ""),
-                        timestamp = o.optLong("timestamp", System.currentTimeMillis())
+                        timestamp = o.optLong("timestamp", System.currentTimeMillis()),
+                        // v1 exports have no accountId -> null (falls back to main at read time)
+                        accountId = if (o.isNull("accountId")) null else o.optString("accountId", null)
                     )
                 )
             }
         }
 
-        return ParsedData(config, groups, subtasks, completions, spendings)
+        val bankAccounts = mutableListOf<BankAccount>()
+        if (root.has("bankAccounts") && !root.isNull("bankAccounts")) {
+            val arr = root.getJSONArray("bankAccounts")
+            for (i in 0 until arr.length()) {
+                val o = arr.getJSONObject(i)
+                bankAccounts.add(
+                    BankAccount(
+                        id = o.getString("id"),
+                        name = o.optString("name", ""),
+                        balance = o.optDouble("balance", 0.0),
+                        isMain = o.optBoolean("isMain", false),
+                        createdAt = o.optLong("createdAt", System.currentTimeMillis())
+                    )
+                )
+            }
+        }
+
+        return ParsedData(config, groups, subtasks, completions, spendings, bankAccounts)
     }
 }

@@ -84,6 +84,26 @@
     <string name="todo_value_positive">+%1$.0f %2$s</string>
     <string name="counter_fraction">%1$d/%2$d</string>
 
+    <!-- Bank accounts -->
+    <string name="accounts_title">Számláim</string>
+    <string name="accounts_badge">Számlák</string>
+    <string name="accounts_missing">Hiányos számla</string>
+    <string name="no_accounts">Még nincs számla megadva — add hozzá az elsőt!</string>
+    <string name="add_account">Számla hozzáadása</string>
+    <string name="edit_account_title">Számla szerkesztése</string>
+    <string name="account_name_label">Számla neve</string>
+    <string name="account_balance_label">Aktuális egyenleg (%1$s)</string>
+    <string name="main_account">Főszámla</string>
+    <string name="set_as_main">Főszámlává tesz</string>
+    <string name="topup_title">Jóváírás (pl. havi fizetés)</string>
+    <string name="topup_action">Jóváír</string>
+    <string name="delete_account_desc">Számla törlése</string>
+    <string name="delete_account_confirm_title">Számla törlése</string>
+    <string name="delete_account_confirm_msg">A számla költései átkerülnek a főszámlára. Biztosan törlöd?</string>
+    <string name="delete_last_account_confirm_msg">Ez az utolsó számla — a költések megmaradnak, de nem lesz mihez kötve. Biztosan törlöd?</string>
+    <string name="account_for_spending">Melyik számláról?</string>
+    <string name="account_balance_value">%1$.0f %2$s</string>
+
     <!-- Common actions -->
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>

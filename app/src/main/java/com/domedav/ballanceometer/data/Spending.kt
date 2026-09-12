@@ -8,5 +8,7 @@ data class Spending(
     @PrimaryKey val id: String,
     val amount: Double,
     val note: String = "",
-    val timestamp: Long
+    val timestamp: Long,
+    /** Bank account this spending was paid from. Null = legacy spending, falls back to main account. */
+    val accountId: String? = null
 )
