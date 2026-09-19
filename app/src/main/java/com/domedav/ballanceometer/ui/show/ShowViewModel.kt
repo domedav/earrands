@@ -16,6 +16,7 @@ import com.domedav.ballanceometer.widget.BallanceWidgetUpdater
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -49,6 +50,26 @@ class ShowViewModel(application: Application) : AndroidViewModel(application) {
 
     val spendings: StateFlow<List<Spending>> = repository.spendings
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // ---- Spending history (search + day grouping, existing flows untouched) ----
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
+
+    fun setSearchQuery(q: String) {
+        _searchQuery.value = q
+    }
+
+    val filteredSpendings: StateFlow<List<Spending>> =
+        combine(spendings, _searchQuery) { list, q -> filterSpendings(list, q) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val spendingDays: StateFlow<List<SpendingDay>> = filteredSpendings
+        .map { buildSpendingDays(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val filteredTotal: StateFlow<Double> = filteredSpendings
+        .map { it.sumOf { s -> s.amount } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 
     val bankAccounts: StateFlow<List<BankAccount>> = repository.bankAccounts
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

@@ -76,10 +76,14 @@ fun ShowScreen(
 
     var showAddSpending by remember { mutableStateOf(false) }
     var showAccounts by remember { mutableStateOf(false) }
+    var showHistory by remember { mutableStateOf(false) }
 
     val noGroupLabel = stringResource(R.string.no_subtasks)
     val grouped = remember(todayTodos) {
         todayTodos.groupBy { it.groupName ?: noGroupLabel }.toSortedMap()
+    }
+    val previewSpendings = remember(spendings) {
+        spendings.sortedByDescending { it.timestamp }.take(8)
     }
 
     LazyColumn(
@@ -212,6 +216,9 @@ fun ShowScreen(
                     Icon(imageVector = Icons.Filled.Add, contentDescription = null, modifier = Modifier.padding(end = 4.dp))
                     Text(text = stringResource(R.string.subtract_action))
                 }
+                TextButton(onClick = { showHistory = true }) {
+                    Text(text = stringResource(R.string.all_spendings_title))
+                }
             }
         }
 
@@ -233,7 +240,7 @@ fun ShowScreen(
                 }
             }
         } else {
-            items(spendings.sortedByDescending { it.timestamp }.take(8), key = { it.id }) { spending ->
+            items(previewSpendings, key = { it.id }) { spending ->
                 SpendingRow(
                     spending = spending,
                     currency = currency,
@@ -268,14 +275,28 @@ fun ShowScreen(
             onTopUp = { id, amount -> viewModel.topUpAccount(id, amount) }
         )
     }
+
+    if (showHistory) {
+        SpendingHistorySheet(
+            viewModel = viewModel,
+            currency = currency,
+            onDismiss = { showHistory = false }
+        )
+    }
 }
 
 @Composable
-private fun SpendingRow(
+internal fun SpendingRow(
     spending: Spending,
     currency: String,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    accountName: String? = null
 ) {
+    val dateTime = remember(spending.timestamp) {
+        java.time.Instant.ofEpochMilli(spending.timestamp)
+            .atZone(java.time.ZoneId.systemDefault())
+            .format(java.time.format.DateTimeFormatter.ofPattern("MM.dd HH:mm"))
+    }
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -294,10 +315,23 @@ private fun SpendingRow(
                     text = stringResource(R.string.spending_value_negative, spending.amount, currency),
                     style = MaterialTheme.typography.titleSmall
                 )
-                if (spending.note.isNotBlank()) {
+                if (spending.note.isBlank()) {
                     Text(
-                        text = spending.note,
+                        text = dateTime,
                         style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    Text(
+                        text = spending.note + " • " + dateTime,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (accountName != null) {
+                    Text(
+                        text = accountName,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }

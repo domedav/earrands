@@ -81,6 +81,9 @@
     <string name="subtract_action">Levonás</string>
     <string name="delete_spending_desc">Kiadás törlése</string>
     <string name="spending_value_negative">- %1$.0f %2$s</string>
+    <string name="all_spendings_title">Összes kiadás</string>
+    <string name="search_spendings_label">Keresés megjegyzés, összeg vagy dátum alapján</string>
+    <string name="no_spendings_for_query">Nincs találat erre a keresésre</string>
     <string name="todo_value_positive">+%1$.0f %2$s</string>
     <string name="counter_fraction">%1$d/%2$d</string>
 

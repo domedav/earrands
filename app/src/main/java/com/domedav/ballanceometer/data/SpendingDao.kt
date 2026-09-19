@@ -12,6 +12,12 @@ interface SpendingDao {
     @Query("SELECT * FROM spendings")
     fun getAll(): Flow<List<Spending>>
 
+    @Query("SELECT * FROM spendings ORDER BY timestamp DESC")
+    fun getAllOrdered(): Flow<List<Spending>>
+
+    @Query("SELECT * FROM spendings WHERE timestamp BETWEEN :from AND :to ORDER BY timestamp DESC")
+    fun getBetween(from: Long, to: Long): Flow<List<Spending>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(spending: Spending)
 
