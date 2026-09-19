@@ -9,15 +9,25 @@ import java.time.YearMonth
 
 object BalanceEngine {
 
+    const val DAILY_MULTIPLIER = 1.0
+    const val WEEKLY_MULTIPLIER = 6.0
+    const val MONTHLY_MULTIPLIER = 24.0
+    const val ONCE_MULTIPLIER = 85.0
+    const val ONCE_BONUS = 2.0
+    const val SUBTASK_WEIGHT_MIN = 0f
+    const val SUBTASK_WEIGHT_MAX = 100f
+    const val SUBTASK_WEIGHT_DEFAULT = 50f
+    const val SUBTASK_WEIGHT_NEUTRAL = 50.0
+
     fun daysInMonth(year: Int, month: Int): Int {
         return YearMonth.of(year, month).lengthOfMonth()
     }
 
     private fun multiplier(rec: Recurrence): Double = when (rec) {
-        Recurrence.DAILY -> 1.0
-        Recurrence.WEEKLY -> 6.0
-        Recurrence.MONTHLY -> 24.0
-        Recurrence.ONCE -> 85.0
+        Recurrence.DAILY -> DAILY_MULTIPLIER
+        Recurrence.WEEKLY -> WEEKLY_MULTIPLIER
+        Recurrence.MONTHLY -> MONTHLY_MULTIPLIER
+        Recurrence.ONCE -> ONCE_MULTIPLIER
     }
 
     fun valuePerInstance(
@@ -46,9 +56,15 @@ object BalanceEngine {
         val base = groupShare / totalInstances.toDouble()
         val rec = try { Recurrence.valueOf(subtask.recurrence) } catch (_: Exception) { Recurrence.ONCE }
         val mult = multiplier(rec)
-        val onceDouble = if (rec == Recurrence.ONCE) 2.0 else 1.0
+        val onceDouble = if (rec == Recurrence.ONCE) ONCE_BONUS else 1.0
+        // Egyszeri súly: ugyanaz a 0-100 logika mint a csoportsúlynál,
+        // 50 = normál (1.0 faktor), csak ONCE feladatokra hat.
+        val weightFactor = if (rec == Recurrence.ONCE) {
+            val w = subtask.weight.toDouble()
+            if (!w.isFinite() || w <= 0.0) 0.0 else w / SUBTASK_WEIGHT_NEUTRAL
+        } else 1.0
         // ONCE 85x *2 =170x — nem tartja magát a büdzséhez, bonus
-        return base * mult * onceDouble
+        return base * mult * onceDouble * weightFactor
     }
 
     fun unlockedTotal(completions: List<Completion>): Double {

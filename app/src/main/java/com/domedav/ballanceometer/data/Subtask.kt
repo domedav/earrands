@@ -22,5 +22,6 @@ data class Subtask(
     val groupId: String,
     val title: String,
     val recurrence: String,
-    val createdAt: Long
+    val createdAt: Long,
+    val weight: Float = 50f
 )

@@ -8,6 +8,7 @@ import com.domedav.ballanceometer.data.BallanceDatabase
 import com.domedav.ballanceometer.data.BallanceRepository
 import com.domedav.ballanceometer.data.Subtask
 import com.domedav.ballanceometer.data.TaskGroup
+import com.domedav.ballanceometer.domain.BalanceEngine
 import com.domedav.ballanceometer.widget.BallanceWidgetUpdater
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -80,7 +81,7 @@ class ConfigViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun addSubtask(groupId: String, title: String, recurrence: String) {
+    fun addSubtask(groupId: String, title: String, recurrence: String, weight: Float = BalanceEngine.SUBTASK_WEIGHT_DEFAULT) {
         viewModelScope.launch {
             repository.addSubtask(
                 Subtask(
@@ -88,7 +89,8 @@ class ConfigViewModel(application: Application) : AndroidViewModel(application) 
                     groupId = groupId,
                     title = title,
                     recurrence = recurrence,
-                    createdAt = System.currentTimeMillis()
+                    createdAt = System.currentTimeMillis(),
+                    weight = weight.coerceIn(BalanceEngine.SUBTASK_WEIGHT_MIN, BalanceEngine.SUBTASK_WEIGHT_MAX)
                 )
             )
             BallanceWidgetUpdater.enqueueImmediate(getApplication())

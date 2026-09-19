@@ -97,7 +97,9 @@ class BallanceWidget : GlanceAppWidget() {
                 title = st.title,
                 groupName = group?.name ?: "",
                 isCompleted = completedTodayIds.contains(st.id),
-                value = value
+                value = value,
+                weight = st.weight,
+                isOnce = rec == com.domedav.ballanceometer.data.Recurrence.ONCE
             )
         }.sortedWith(compareBy({ it.isCompleted }, { it.groupName }, { it.title }))
 
@@ -266,7 +268,9 @@ private data class TodoEntry(
     val title: String,
     val groupName: String,
     val isCompleted: Boolean,
-    val value: Double
+    val value: Double,
+    val weight: Float,
+    val isOnce: Boolean
 )
 
 
@@ -289,6 +293,16 @@ private fun TodoRow(todo: TodoEntry, isLast: Boolean) {
                     ),
                     maxLines = 1
                 )
+                if (todo.isOnce) {
+                    Text(
+                        text = LocalContext.current.getString(R.string.subtask_weight_badge, todo.weight),
+                        style = TextStyle(
+                            fontSize = 11.sp,
+                            color = GlanceTheme.colors.onSurfaceVariant
+                        ),
+                        maxLines = 1
+                    )
+                }
             }
             if (!todo.isCompleted) {
                 Box(

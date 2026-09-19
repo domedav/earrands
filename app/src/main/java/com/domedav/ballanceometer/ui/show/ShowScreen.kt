@@ -216,9 +216,6 @@ fun ShowScreen(
                     Icon(imageVector = Icons.Filled.Add, contentDescription = null, modifier = Modifier.padding(end = 4.dp))
                     Text(text = stringResource(R.string.subtract_action))
                 }
-                TextButton(onClick = { showHistory = true }) {
-                    Text(text = stringResource(R.string.all_spendings_title))
-                }
             }
         }
 
@@ -246,6 +243,16 @@ fun ShowScreen(
                     currency = currency,
                     onDelete = { viewModel.deleteSpending(spending) }
                 )
+            }
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    TextButton(onClick = { showHistory = true }) {
+                        Text(text = stringResource(R.string.all_spendings_title))
+                    }
+                }
             }
         }
     }

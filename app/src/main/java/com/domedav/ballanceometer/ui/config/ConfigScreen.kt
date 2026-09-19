@@ -59,6 +59,7 @@ import com.domedav.ballanceometer.R
 import com.domedav.ballanceometer.data.Recurrence
 import com.domedav.ballanceometer.data.Subtask
 import com.domedav.ballanceometer.data.TaskGroup
+import com.domedav.ballanceometer.domain.BalanceEngine
 
 @Composable
 fun ConfigScreen(viewModel: ConfigViewModel = viewModel()) {
@@ -247,10 +248,18 @@ fun ConfigScreen(viewModel: ConfigViewModel = viewModel()) {
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(subtask.title, style = MaterialTheme.typography.bodyMedium)
-                                            AssistChip(
-                                                onClick = {},
-                                                label = { Text(recurrenceDisplayName(subtask.recurrence)) }
-                                            )
+                                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                AssistChip(
+                                                    onClick = {},
+                                                    label = { Text(recurrenceDisplayName(subtask.recurrence)) }
+                                                )
+                                                if (subtask.recurrence == Recurrence.ONCE.name) {
+                                                    AssistChip(
+                                                        onClick = {},
+                                                        label = { Text(stringResource(R.string.subtask_weight_badge, subtask.weight)) }
+                                                    )
+                                                }
+                                            }
                                         }
                                         Row {
                                             IconButton(onClick = { editingSubtask = subtask }) {
@@ -283,8 +292,8 @@ fun ConfigScreen(viewModel: ConfigViewModel = viewModel()) {
     subtaskDialogGroupId?.let { gid ->
         AddSubtaskDialog(
             onDismiss = { subtaskDialogGroupId = null },
-            onConfirm = { title, recurrence ->
-                viewModel.addSubtask(gid, title, recurrence)
+            onConfirm = { title, recurrence, weight ->
+                viewModel.addSubtask(gid, title, recurrence, weight)
                 subtaskDialogGroupId = null
             }
         )
@@ -294,8 +303,8 @@ fun ConfigScreen(viewModel: ConfigViewModel = viewModel()) {
         EditSubtaskDialog(
             subtask = st,
             onDismiss = { editingSubtask = null },
-            onConfirm = { newTitle, newRecurrence ->
-                viewModel.updateSubtask(st.copy(title = newTitle, recurrence = newRecurrence))
+            onConfirm = { newTitle, newRecurrence, newWeight ->
+                viewModel.updateSubtask(st.copy(title = newTitle, recurrence = newRecurrence, weight = newWeight))
                 editingSubtask = null
             }
         )
@@ -356,12 +365,43 @@ private fun AddGroupDialog(
 }
 
 @Composable
+private fun SubtaskWeightSlider(
+    weight: Float,
+    onWeightChange: (Float) -> Unit
+) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(stringResource(R.string.subtask_weight_label), style = MaterialTheme.typography.bodyMedium)
+            Badge(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onPrimaryContainer) {
+                Text(String.format("%.1f", weight), modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+            }
+        }
+        Slider(
+            value = weight,
+            onValueChange = { onWeightChange(it.coerceIn(BalanceEngine.SUBTASK_WEIGHT_MIN, BalanceEngine.SUBTASK_WEIGHT_MAX)) },
+            valueRange = BalanceEngine.SUBTASK_WEIGHT_MIN..BalanceEngine.SUBTASK_WEIGHT_MAX,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            stringResource(R.string.subtask_weight_once_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
 private fun AddSubtaskDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String, String) -> Unit
+    onConfirm: (String, String, Float) -> Unit
 ) {
     var title by remember { mutableStateOf("") }
     var recurrence by remember { mutableStateOf(Recurrence.ONCE.name) }
+    var weight by remember { mutableStateOf(BalanceEngine.SUBTASK_WEIGHT_DEFAULT) }
     var expanded by remember { mutableStateOf(false) }
 
     AlertDialog(
@@ -383,10 +423,14 @@ private fun AddSubtaskDialog(
                     onExpandedChange = { expanded = it },
                     onSelect = { recurrence = it; expanded = false }
                 )
+                if (recurrence == Recurrence.ONCE.name) {
+                    Spacer(Modifier.height(8.dp))
+                    SubtaskWeightSlider(weight = weight, onWeightChange = { weight = it })
+                }
             }
         },
         confirmButton = {
-            Button(onClick = { if (title.isNotBlank()) onConfirm(title.trim(), recurrence) }) { Text(stringResource(R.string.add)) }
+            Button(onClick = { if (title.isNotBlank()) onConfirm(title.trim(), recurrence, weight) }) { Text(stringResource(R.string.add)) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
@@ -398,10 +442,11 @@ private fun AddSubtaskDialog(
 private fun EditSubtaskDialog(
     subtask: Subtask,
     onDismiss: () -> Unit,
-    onConfirm: (String, String) -> Unit
+    onConfirm: (String, String, Float) -> Unit
 ) {
     var title by remember { mutableStateOf(subtask.title) }
     var recurrence by remember { mutableStateOf(subtask.recurrence) }
+    var weight by remember { mutableStateOf(subtask.weight) }
     var expanded by remember { mutableStateOf(false) }
 
     AlertDialog(
@@ -423,10 +468,14 @@ private fun EditSubtaskDialog(
                     onExpandedChange = { expanded = it },
                     onSelect = { recurrence = it; expanded = false }
                 )
+                if (recurrence == Recurrence.ONCE.name) {
+                    Spacer(Modifier.height(8.dp))
+                    SubtaskWeightSlider(weight = weight, onWeightChange = { weight = it })
+                }
             }
         },
         confirmButton = {
-            Button(onClick = { if (title.isNotBlank()) onConfirm(title.trim(), recurrence) }) { Text(stringResource(R.string.save)) }
+            Button(onClick = { if (title.isNotBlank()) onConfirm(title.trim(), recurrence, weight) }) { Text(stringResource(R.string.save)) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }

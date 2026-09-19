@@ -58,6 +58,9 @@
     <string name="weight">Weight</string>
     <string name="weight_label">Weight</string>
     <string name="weight_range_label">Weight 0-100</string>
+    <string name="subtask_weight_label">Task weight</string>
+    <string name="subtask_weight_once_hint">Weight applies only to Once tasks — 50 is normal</string>
+    <string name="subtask_weight_badge">Weight %1$.1f</string>
     <string name="name_label">Name</string>
     <string name="title_label">Title</string>
     <string name="recurrence_label">Recurrence</string>

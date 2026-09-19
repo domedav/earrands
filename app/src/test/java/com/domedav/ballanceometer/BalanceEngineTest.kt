@@ -188,6 +188,52 @@ class BalanceEngineTest {
     }
 
     @Test
+    fun onceWeight_scalesValueProportionally() {
+        // 50 = normal (1.0x), 100 = double, default weight is 50f
+        val groups = listOf(group("g1", 100f))
+        fun onceValue(weight: Float): Double {
+            val sub = Subtask(id = "s", groupId = "g1", title = "s", recurrence = "ONCE", createdAt = 0L, weight = weight)
+            return BalanceEngine.valuePerInstance(
+                group = groups[0], subtask = sub,
+                allGroups = groups, allSubtasks = listOf(sub),
+                year = 2026, month = 1, earnable = 10_000.0
+            )
+        }
+        assertEquals(10_000.0 * 170, onceValue(50f), 0.001)
+        assertEquals(10_000.0 * 170 * 2, onceValue(100f), 0.001)
+        assertEquals(10_000.0 * 170 * 0.5, onceValue(25f), 0.001)
+    }
+
+    @Test
+    fun onceWeight_zeroOrNegativeGivesZero() {
+        val groups = listOf(group("g1", 100f))
+        fun onceValue(weight: Float): Double {
+            val sub = Subtask(id = "s", groupId = "g1", title = "s", recurrence = "ONCE", createdAt = 0L, weight = weight)
+            return BalanceEngine.valuePerInstance(
+                group = groups[0], subtask = sub,
+                allGroups = groups, allSubtasks = listOf(sub),
+                year = 2026, month = 1, earnable = 10_000.0
+            )
+        }
+        assertEquals(0.0, onceValue(0f), 0.0)
+        assertEquals(0.0, onceValue(-10f), 0.0)
+    }
+
+    @Test
+    fun nonOnceWeight_isIgnored() {
+        // DAILY súlymező sem változtat az értéken
+        val groups = listOf(group("g1", 100f))
+        val normal = subtask("s1", "g1", "DAILY")
+        val heavy = Subtask(id = "s1", groupId = "g1", title = "s1", recurrence = "DAILY", createdAt = 0L, weight = 100f)
+        fun valueOf(sub: Subtask): Double = BalanceEngine.valuePerInstance(
+            group = groups[0], subtask = sub,
+            allGroups = groups, allSubtasks = listOf(sub),
+            year = 2026, month = 1, earnable = 10_000.0
+        )
+        assertEquals(valueOf(normal), valueOf(heavy), 0.0)
+    }
+
+    @Test
     fun daysInMonth_handlesLeapFebruary() {
         assertEquals(31, BalanceEngine.daysInMonth(2026, 1))
         assertEquals(28, BalanceEngine.daysInMonth(2026, 2))

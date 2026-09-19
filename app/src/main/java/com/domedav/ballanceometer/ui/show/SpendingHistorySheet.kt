@@ -1,5 +1,6 @@
 package com.domedav.ballanceometer.ui.show
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -118,6 +119,7 @@ fun SpendingHistorySheet(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
                                     .padding(vertical = 4.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically

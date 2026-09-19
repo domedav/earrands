@@ -1,11 +1,12 @@
 package com.domedav.ballanceometer.data
 
+import com.domedav.ballanceometer.domain.BalanceEngine
 import org.json.JSONArray
 import org.json.JSONObject
 
 object ExportImportHelper {
 
-    const val VERSION = 2
+    const val VERSION = 3
 
     fun buildExportJson(
         config: AppConfig?,
@@ -47,6 +48,7 @@ object ExportImportHelper {
             o.put("groupId", s.groupId)
             o.put("title", s.title)
             o.put("recurrence", s.recurrence)
+            o.put("weight", s.weight.toDouble())
             o.put("createdAt", s.createdAt)
             subtasksArr.put(o)
         }
@@ -142,7 +144,8 @@ object ExportImportHelper {
                         groupId = o.getString("groupId"),
                         title = o.getString("title"),
                         recurrence = o.optString("recurrence", "ONCE"),
-                        createdAt = o.optLong("createdAt", System.currentTimeMillis())
+                        createdAt = o.optLong("createdAt", System.currentTimeMillis()),
+                        weight = o.optDouble("weight", BalanceEngine.SUBTASK_WEIGHT_NEUTRAL).toFloat()
                     )
                 )
             }

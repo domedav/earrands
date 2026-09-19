@@ -58,6 +58,9 @@
     <string name="weight">Súly</string>
     <string name="weight_label">Súly</string>
     <string name="weight_range_label">Súly 0-100</string>
+    <string name="subtask_weight_label">Feladat súlya</string>
+    <string name="subtask_weight_once_hint">A súly csak az egyszeri feladatokra vonatkozik — 50 a normál</string>
+    <string name="subtask_weight_badge">Súly %1$.1f</string>
     <string name="name_label">Név</string>
     <string name="title_label">Cím</string>
     <string name="recurrence_label">Ismétlődés</string>
