@@ -62,6 +62,7 @@ fun ShowScreen(
 ) {
     val config by viewModel.config.collectAsState()
     val spendings by viewModel.spendings.collectAsState()
+    val monthlySpent by viewModel.monthlySpent.collectAsState()
     val todayTodos by viewModel.todayTodos.collectAsState()
     val available by viewModel.available.collectAsState()
     val unlocked by viewModel.unlocked.collectAsState()
@@ -100,7 +101,7 @@ fun ShowScreen(
                 minimal = minimal,
                 total = total,
                 currency = currency,
-                spent = spendings.sumOf { it.amount },
+                spent = monthlySpent,
                 hasAccounts = bankAccounts.isNotEmpty(),
                 onAccountsClick = { showAccounts = true }
             )

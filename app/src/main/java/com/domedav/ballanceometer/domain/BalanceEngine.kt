@@ -5,7 +5,9 @@ import com.domedav.ballanceometer.data.Recurrence
 import com.domedav.ballanceometer.data.Spending
 import com.domedav.ballanceometer.data.Subtask
 import com.domedav.ballanceometer.data.TaskGroup
+import java.time.Instant
 import java.time.YearMonth
+import java.time.ZoneId
 
 object BalanceEngine {
 
@@ -70,6 +72,35 @@ object BalanceEngine {
     fun unlockedTotal(completions: List<Completion>): Double {
         return completions.sumOf { it.valueUnlocked }
     }
+
+    /** Havi nézet: csak az adott YearMonth-ba eső completions (date "yyyy-MM-dd"). */
+    fun completionsInMonth(completions: List<Completion>, year: Int, month: Int): List<Completion> {
+        val prefix = "%04d-%02d".format(year, month)
+        return completions.filter { it.date.startsWith(prefix) }
+    }
+
+    /** Havi nézet: csak az adott YearMonth-ba eső spendings (timestamp millis). */
+    fun spendingsInMonth(
+        spendings: List<Spending>,
+        year: Int,
+        month: Int,
+        zone: ZoneId = ZoneId.systemDefault()
+    ): List<Spending> {
+        val ym = YearMonth.of(year, month)
+        return spendings.filter {
+            YearMonth.from(Instant.ofEpochMilli(it.timestamp).atZone(zone)) == ym
+        }
+    }
+
+    fun unlockedInMonth(completions: List<Completion>, year: Int, month: Int): Double =
+        unlockedTotal(completionsInMonth(completions, year, month))
+
+    fun spentInMonth(
+        spendings: List<Spending>,
+        year: Int,
+        month: Int,
+        zone: ZoneId = ZoneId.systemDefault()
+    ): Double = spendingsInMonth(spendings, year, month, zone).sumOf { it.amount }
 
     fun available(minimal: Double, unlocked: Double, spendings: List<Spending>): Double {
         val spent = spendings.sumOf { it.amount }

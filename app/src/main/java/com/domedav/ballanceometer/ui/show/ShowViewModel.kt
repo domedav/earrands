@@ -84,12 +84,22 @@ class ShowViewModel(application: Application) : AndroidViewModel(application) {
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 
     val unlocked: StateFlow<Double> = completions
-        .map { list -> BalanceEngine.unlockedTotal(list) }
+        .map { list ->
+            val ym = YearMonth.now()
+            BalanceEngine.unlockedInMonth(list, ym.year, ym.monthValue)
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 
-    val available: StateFlow<Double> = combine(config, unlocked, spendings) { cfg, ul, sps ->
+    val monthlySpent: StateFlow<Double> = spendings
+        .map { list ->
+            val ym = YearMonth.now()
+            BalanceEngine.spentInMonth(list, ym.year, ym.monthValue)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
+    val available: StateFlow<Double> = combine(config, unlocked, monthlySpent) { cfg, ul, spent ->
         val minimal = cfg?.minimalSpend ?: 0.0
-        BalanceEngine.available(minimal, ul, sps)
+        minimal + ul - spent
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 
     val remainingLocked: StateFlow<Double> = combine(earnable, unlocked) { e, u ->

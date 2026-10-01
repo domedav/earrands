@@ -240,4 +240,32 @@ class BalanceEngineTest {
         assertEquals(29, BalanceEngine.daysInMonth(2024, 2))
         assertEquals(30, BalanceEngine.daysInMonth(2026, 4))
     }
+
+    @Test
+    fun monthlyView_septemberKept_octoberStartsAtZero() {
+        // Szept: 5700 unlock; okt nézetben 0 -> 0/30000, available = minimal
+        val completions = listOf(
+            Completion("c1", "s1", "2026-09-30", 0L, 5700.0),
+            Completion("c2", "s1", "2026-10-01", 0L, 100.0)
+        )
+        assertEquals(5700.0, BalanceEngine.unlockedInMonth(completions, 2026, 9), 0.0)
+        assertEquals(100.0, BalanceEngine.unlockedInMonth(completions, 2026, 10), 0.0)
+        val septOnly = listOf(completions[0])
+        assertEquals(0.0, BalanceEngine.unlockedInMonth(septOnly, 2026, 10), 0.0)
+        // új hónap reggel: available = minimal + 0 - 0
+        assertEquals(5000.0, 5000.0 + BalanceEngine.unlockedInMonth(septOnly, 2026, 10) - 0.0, 0.0)
+    }
+
+    @Test
+    fun monthlySpent_onlyCurrentMonth() {
+        val zone = java.time.ZoneId.systemDefault()
+        fun ts(y: Int, m: Int, d: Int): Long =
+            java.time.LocalDate.of(y, m, d).atStartOfDay(zone).toInstant().toEpochMilli()
+        val spendings = listOf(
+            Spending("s1", 2000.0, "", ts(2026, 9, 30)),
+            Spending("s2", 500.0, "", ts(2026, 10, 1))
+        )
+        assertEquals(2000.0, BalanceEngine.spentInMonth(spendings, 2026, 9, zone), 0.0)
+        assertEquals(500.0, BalanceEngine.spentInMonth(spendings, 2026, 10, zone), 0.0)
+    }
 }

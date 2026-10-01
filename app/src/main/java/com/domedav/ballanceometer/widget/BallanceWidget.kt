@@ -67,8 +67,10 @@ class BallanceWidget : GlanceAppWidget() {
         val total = config?.totalBalance ?: 0.0
         val currency = config?.currency ?: "HUF"
         val earnable = if (config != null) maxOf(0.0, total - minimal) else 0.0
-        val unlocked = BalanceEngine.unlockedTotal(completions)
-        val available = BalanceEngine.available(minimal, unlocked, spendings)
+        val ymNow = YearMonth.now()
+        val unlocked = BalanceEngine.unlockedInMonth(completions, ymNow.year, ymNow.monthValue)
+        val spentMonth = BalanceEngine.spentInMonth(spendings, ymNow.year, ymNow.monthValue)
+        val available = minimal + unlocked - spentMonth
         val progress = if (earnable > 0) (unlocked / earnable).coerceIn(0.0, 1.0) else 0.0
 
         val todayDate = LocalDate.now()
